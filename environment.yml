@@ -1,0 +1,30 @@
+name: ai_ml_final
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - numpy
+  - scipy
+  - pandas
+  - pillow
+  - matplotlib
+  - ffmpeg
+  - pyyaml
+  - networkx
+
+  - pip:
+      - mediapipe==0.10.21
+      - tensorflow==2.15.0
+      - opencv-python==4.11.0.86
+      - pytubefix==10.2.1
+      - tqdm==4.67.1
+      - protobuf==4.25.3
+      - imageio
+      - imageio-ffmpeg
+      - rich
+      - websockets
+      - yourdfpy
+      - viser
+
