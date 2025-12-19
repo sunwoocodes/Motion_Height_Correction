@@ -180,6 +180,59 @@ def create_height_corrected_target(seq):
     
     return processed
 
+def prevent_arm_clipping(seq, threshold=0.15):
+    """
+    팔이 골반/허벅지를 뚫는 것을 방지 (Clipping Prevention)
+    seq: (T, 33, 3) Normalized Pose Data
+    threshold: 최소 허용 거리 (이보다 가까우면 밀어냄)
+    """
+    processed = seq.copy()
+    
+    # BlazePose 인덱스
+    # 23: Left Hip, 24: Right Hip
+    # 15: Left Wrist, 16: Right Wrist
+    # 13: Left Elbow, 14: Right Elbow
+    
+    L_HIP, R_HIP = 23, 24
+    L_WRIST, R_WRIST = 15, 16
+    
+    # --- 왼쪽 팔 처리 ---
+    # 왼쪽 힙 위치
+    l_hip_pos = processed[:, L_HIP, :] 
+    # 왼쪽 손목 위치
+    l_wrist_pos = processed[:, L_WRIST, :]
+    
+    # 거리 계산
+    dist_l = np.linalg.norm(l_wrist_pos - l_hip_pos, axis=1)
+    
+    # 충돌 감지 (거리가 threshold보다 작은 프레임 찾기)
+    # 단순히 밀어내는 게 아니라, '바깥쪽'으로 밀어야 함
+    # 로컬 좌표계에서 X축이 좌우이므로, 왼쪽 팔은 X > 0 방향(또는 <0)으로 밀어야 함
+    # (Body Frame 변환 로직에 따라 X축 방향 확인 필요. 보통 왼쪽이 +X or -X)
+    
+    # 간단한 로직: 현재 손목 위치에서 힙을 뺀 벡터(방향)로 밀어냄
+    push_vec_l = l_wrist_pos - l_hip_pos
+    push_vec_l = _normalize(push_vec_l) # 단위 벡터
+    
+    # 침범한 깊이만큼 바깥으로 이동
+    mask_l = dist_l < threshold
+    # l_hip_pos + (push_vec * threshold) 위치로 강제 이동
+    processed[mask_l, L_WRIST, :] = l_hip_pos[mask_l] + push_vec_l[mask_l] * threshold
+
+    # --- 오른쪽 팔 처리 ---
+    r_hip_pos = processed[:, R_HIP, :]
+    r_wrist_pos = processed[:, R_WRIST, :]
+    
+    dist_r = np.linalg.norm(r_wrist_pos - r_hip_pos, axis=1)
+    
+    push_vec_r = r_wrist_pos - r_hip_pos
+    push_vec_r = _normalize(push_vec_r)
+    
+    mask_r = dist_r < threshold
+    processed[mask_r, R_WRIST, :] = r_hip_pos[mask_r] + push_vec_r[mask_r] * threshold
+
+    return processed
+
 
 def main():
     print("RUNNING FILE =", __file__)
@@ -210,6 +263,10 @@ def main():
             # Step 2: scale normalize
             # print("  > Step 2: Scale Normalization...")
             scaled_seq, scaled_traj, scale_val = normalize_scale(local_seq, traj)
+
+            # Step 2.5: Prevent Arm Clipping
+            # threshold는 0.15~0.2 정도가 적당 (스케일 정규화 후 값이므로)
+            clipping_fixed_seq = prevent_arm_clipping(scaled_seq, threshold=0.18)
 
             # Step 3: height correction (Target Data 생성)
             # print("  > Step 3: Height Correction...")
