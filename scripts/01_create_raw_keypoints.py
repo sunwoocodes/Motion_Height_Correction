@@ -84,10 +84,39 @@ def extract_3d_keypoints(video_path, dir_path =RAW_KEYPOINT_DIR, name ="Data"):
     print(f"📌 Saved 3D keypoints → {out_path}")
 
 def main():
-    video_path, name = download_youtube('https://youtu.be/ylyV1E_L9rA?si=4I8ER9nV99wOzg4d')
-    extract_3d_keypoints(video_path, RAW_KEYPOINT_DIR, name)
-    # TODO : URL list to download various motion dataset.
-    # url_list
+    # ---------------------------------------------------------
+    # [설정] 다운로드할 유튜브 영상 리스트
+    # ---------------------------------------------------------
+    VIDEO_URLS = [
+        "https://youtu.be/ylyV1E_L9rA?si=4I8ER9nV99wOzg4d",  # 영상 1
+        "https://youtu.be/example_url_2",                    # 영상 2
+        "https://youtu.be/example_url_3",                    # 영상 3
+        # ... 계속 추가 가능
+    ]
+    # ---------------------------------------------------------
+
+    print(f"📋 총 {len(VIDEO_URLS)}개의 영상을 처리합니다.\n")
+
+    for i, url in enumerate(VIDEO_URLS):
+        print(f"▶️ [{i+1}/{len(VIDEO_URLS)}] 처리 중: {url}")
+        
+        try:
+            # 1. 유튜브 다운로드
+            video_path, name = download_youtube(url)
+            
+            # 2. 키포인트 추출
+            if video_path and os.path.exists(video_path):
+                extract_3d_keypoints(video_path, RAW_KEYPOINT_DIR, name)
+                print(f"  ✅ 성공: {name}\n")
+            else:
+                print(f"  ❌ 실패: 다운로드된 파일을 찾을 수 없음 ({url})\n")
+                
+        except Exception as e:
+            print(f"  ❌ 에러 발생 ({url}): {e}\n")
+            # 에러가 나도 멈추지 않고 다음 영상으로 넘어갑니다 (continue)
+            continue
+
+    print("🎉 모든 작업이 완료되었습니다!")
 
 if __name__ == "__main__":
     main()
