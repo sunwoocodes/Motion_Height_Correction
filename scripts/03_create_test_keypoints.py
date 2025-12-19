@@ -104,7 +104,7 @@ def extract_3d_keypoints(video_path, dir_path =RAW_KEYPOINT_DIR, name ="Data"):
 
 
 def main():
-    video_path, name = download_youtube('https://youtube.com/shorts/NVwTAz0i0yQ?si=O6k28Y-uqfcHO5MR')
+    video_path, name = download_youtube('https://youtu.be/lGGCL8eKRNo?si=5y5rH1eHIQoTbJJJ')
     extract_3d_keypoints(video_path, RAW_TEST_DIR, name)
     # TODO : URL list to download various motion dataset.
     # url_list
