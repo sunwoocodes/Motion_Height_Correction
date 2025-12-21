@@ -125,7 +125,7 @@ def main():
         # "https://youtube.com/shorts/-2oQ0-ykQ3A?si=9TiRv6-OJ1Mt_voz",
         # "https://youtube.com/shorts/YMhtRttrtnU?si=aVuW0Q9ZrwFoeEl6",
         # "https://youtube.com/shorts/H52Z928zVIM?si=k_AySpbl8ubrU-27",
-        # "https://youtube.com/shorts/qt5k2aPP4Ds?si=dwlALAsFcgbprpZX",
+        # "https://youtube.com/shorts/IZiJEG6dW0w?si=-NHO-uSHUYTYKc-l",
         # "https://youtube.com/shorts/7XuLgEjD9PU?si=EL7_4ulD0xiRVf4u",
         # "https://youtube.com/shorts/3Pv_WKp1dAk?si=q1BqdDe6qTWgVcSd",
         # "https://youtube.com/shorts/AGQNC8MTAvc?si=Dkl7JbIK-YPzZx8L",
@@ -134,18 +134,20 @@ def main():
         # "https://youtube.com/shorts/LEpuqlFkq64?si=HXmLUTaBsPFziADX",
 
         # #Sport#
-        # "https://youtube.com/shorts/D0_atBgcZ_0?si=YXJHctyS2r0Ri2TL",
+        # "https://youtube.com/shorts/WEMSp7tbFiU?si=dOKMVa5H97TAGJKw",
         # "https://youtube.com/shorts/4LyPqANVoDE?si=FJGTqSlDPQnqVcie",
         # "https://youtube.com/shorts/q0nt8CyyteE?si=ODRsyQRj3U9WgAre",
         # "https://youtube.com/shorts/1YI2HvMsKug?si=vcVQs3Hd9R6lQxb0",
         # "https://youtube.com/shorts/qdBLvdu5Y8k?si=Ce1GUO8ny7ZTkvGu",
-        # "https://youtube.com/shorts/5Vj0BzGYBok?si=rgn-e0GtI5oie1w5",
+        # "https://youtube.com/shorts/ta3yfY9Y7S0?si=hX4cEYo8lDZ5gkBF",
         # "https://youtube.com/shorts/TnOkq6KfHsM?si=uIayNAg3r-PK8C0f",
         # "https://youtube.com/shorts/Gt9hlRMXDXc?si=y-99M4j-Mz2mTw2j",
         # "https://youtube.com/shorts/NEhrf-RDg4o?si=Kvvx5-AGODGHafRs",
         # "https://youtube.com/shorts/CSZVGGseOZ4?si=CzhbzO26gAb_zPTn"
 
-        "https://youtube.com/shorts/8tHES29GmUc?si=6B3m3vn_6GjpLNcX"
+        #"https://youtube.com/shorts/8tHES29GmUc?si=6B3m3vn_6GjpLNcX"
+        #"https://youtube.com/shorts/Zh_pLJ2pXso?si=4o2s_YB1285bqwZW"
+        "https://youtube.com/shorts/a2DeNI1kX2g?si=vicMHCyaNR3aDDYP"
 
 
         # ... 계속 추가 가능
