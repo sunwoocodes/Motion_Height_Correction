@@ -231,7 +231,11 @@ def prevent_arm_clipping(seq, threshold=0.15):
     mask_r = dist_r < threshold
     processed[mask_r, R_WRIST, :] = r_hip_pos[mask_r] + push_vec_r[mask_r] * threshold
 
-    return processed
+    fixed_count = np.sum(mask_l) + np.sum(mask_r)
+    total_frames = seq.shape[0]
+    percentage = (fixed_count / total_frames) * 100
+
+    return processed, fixed_count
 
 
 def main():
@@ -239,52 +243,66 @@ def main():
     paths = glob(f"{RAW_KEYPOINTS_DIR}/*.npz")
     print(f"Found {len(paths)} raw keypoint files")
 
+    # [1] 누적 변수 초기화 (반복문 시작 전!)
+    total_all_frames = 0
+    total_all_fixed = 0
+
     for path in paths:
         base = os.path.basename(path).replace(".npz", "")
         print(f"\n[Start Processing] {base} ...")
 
         try:
-            # print("  > Loading .npz file...")
             raw_seq = load_raw_keypoints(path)
-            # print(f"    - Loaded Sequence Shape: {raw_seq.shape} dtype={raw_seq.dtype}")
-
             if raw_seq.shape[0] == 0:
                 print("    ⚠️ ERROR: 데이터 길이가 0입니다.")
                 continue
 
             # Step 0: smoothing
-            # print("  > Step 0: Smoothing...")
             smooth_seq = smooth_pose_data(raw_seq, window_length=9, polyorder=3)
 
-            # Step 1: body frame transform (리턴값 2개 받도록 수정됨)
-            # print("  > Step 1: Body-Frame Local Transform...")
+            # Step 1: body frame transform
             local_seq, traj = process_body_frame_transform(smooth_seq)
 
             # Step 2: scale normalize
-            # print("  > Step 2: Scale Normalization...")
             scaled_seq, scaled_traj, scale_val = normalize_scale(local_seq, traj)
 
-            # Step 2.5: Prevent Arm Clipping
-            # threshold는 0.15~0.2 정도가 적당 (스케일 정규화 후 값이므로)
-            clipping_fixed_seq = prevent_arm_clipping(scaled_seq, threshold=0.18)
+            # Step 2.5: Prevent Arm Clipping (수정 횟수 fix_cnt 받기)
+            clipping_fixed_seq, fix_cnt = prevent_arm_clipping(scaled_seq, threshold=0.18)
 
-            # Step 3: height correction (Target Data 생성)
-            # print("  > Step 3: Height Correction...")
-            final_pose = create_height_corrected_target(scaled_seq)
+            # Step 3: height correction
+            final_pose = create_height_corrected_target(clipping_fixed_seq)
 
             # Save
-            # print("  > Saving...")
             np.save(os.path.join(OUT_DIR, f"{base}_pose.npy"), final_pose)
             np.save(os.path.join(OUT_DIR, f"{base}_trajectory.npy"), scaled_traj)
 
-            print(f"✅ Success: {base} (Frames: {len(final_pose)}, Scale: {scale_val:.4f})")
+            # [2] 현재 영상의 통계 출력
+            current_frames = len(final_pose)
+            current_rate = (fix_cnt / current_frames) * 100
+            print(f"✅ Success: {base}")
+            print(f"   - Frames: {current_frames}, Fixed: {fix_cnt} ({current_rate:.2f}%)")
+
+            # [3] 전체 통계에 누적 (저금통에 넣기)
+            total_all_frames += current_frames
+            total_all_fixed += fix_cnt
 
         except Exception as e:
             print(f"\n❌ FAIL: {base} 처리 중 오류 발생!")
             print(f"에러 메시지: {e}")
             traceback.print_exc()
 
-    print("\nAll Done.")
+    # [4] 반복문이 다 끝나면 종합 결과 출력
+    print("\n" + "="*40)
+    print("📊 [FINAL DATASET REPORT]")
+    print(f"  - Total Videos Processed : {len(paths)}")
+    print(f"  - Total Frames Collected : {total_all_frames}")
+    print(f"  - Total Clipping Fixed   : {total_all_fixed}")
+    
+    if total_all_frames > 0:
+        avg_rate = (total_all_fixed / total_all_frames) * 100
+        print(f"  - Global Correction Rate : {avg_rate:.2f}%")
+    print("="*40 + "\n")
+    print("All Done.")
 
 
 if __name__ == "__main__":
