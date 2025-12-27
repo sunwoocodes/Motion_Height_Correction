@@ -6,7 +6,10 @@ __pycache__/
 .vscode/
 
 # 3. [가장 중요] 용량 큰 데이터 & 모델 무시
-data/
+data/processed/
+data/raw_keypoints/
+data/raw_videos/
+data/test_keypoints/
 experiments/height_mlp_model/
 
 # 4. 가상환경 폴더 (만약 있다면)
