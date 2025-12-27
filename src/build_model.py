@@ -45,7 +45,7 @@ def build_mlp(input_dim, output_dim):
     # 만약 input_dim과 output_dim이 같다면(예: Pose -> Pose 보정), 
     # 원본 입력을 출력에 더해주는 것이 학습에 매우 유리합니다.
     # 여기서는 input(103) -> output(99)로 차원이 달라서 단순 더하기는 불가능하므로
-    # 위와 같이 기본적인 MLP 구조로 마무리합니다.
+    # 위와 같이 기본적인 MLP 구조로 마무리.
 
     model = models.Model(inputs=inputs, outputs=outputs, name="Motion_MLP_V2")
     return model

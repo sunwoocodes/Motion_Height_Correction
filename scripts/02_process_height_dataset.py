@@ -6,7 +6,7 @@ import sys
 import traceback
 import time
 
-# (권장) 스레드 꼬임 방지
+# 스레드 꼬임 방지
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["OPENBLAS_NUM_THREADS"] = "1"
@@ -81,8 +81,8 @@ def _normalize(v, eps=1e-8):
 
 def process_body_frame_transform(seq):
     """
-    [수정됨] 포즈를 로컬 좌표계로 변환하고, 
-    Trajectory(루트 위치 + 회전) 정보를 함께 반환합니다.
+    포즈를 로컬 좌표계로 변환하고, 
+    Trajectory(루트 위치 + 회전) 정보를 함께 반환.
     """
     T = seq.shape[0]
     LHIP, RHIP = 23, 24
@@ -105,7 +105,7 @@ def process_body_frame_transform(seq):
     z_axis = np.cross(x_axis, y_axis_raw)
     z_axis = _normalize(z_axis)
 
-    # 🔥 Roll 제거: Z축을 수평면에 투영 (y성분 0으로 만듦)
+    # Roll 제거: Z축을 수평면에 투영 (y성분 0으로 만듦)
     z_axis[:, 1] = 0.0
     z_axis = _normalize(z_axis)
 
@@ -113,7 +113,7 @@ def process_body_frame_transform(seq):
     y_axis = np.cross(z_axis, x_axis)
     y_axis = _normalize(y_axis)
     
-    # X축도 직교성을 위해 다시 계산 (선택사항이나 안전함)
+    # X축도 직교성을 위해 다시 계산
     x_axis = np.cross(y_axis, z_axis)
     x_axis = _normalize(x_axis)
 
@@ -128,7 +128,7 @@ def process_body_frame_transform(seq):
     seq_local = np.einsum("tji,tbj->tbi", R, p)
 
     # 5. Trajectory 생성 (T, 4) -> [RootX, RootY, RootZ, Rotation_Y_Angle]
-    # 모델 학습 시 Root의 이동량과 회전량을 알기 위해 필요합니다.
+    # 모델 학습 시 Root의 이동량과 회전량을 알기 위해 필요.
     
     # 회전 각도(Azimuth) 계산: Z축(전방 벡터)을 이용해 atan2로 각도 추출
     # z_axis는 (x, 0, z) 형태이므로 x, z를 이용해 각도 계산

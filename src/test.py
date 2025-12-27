@@ -57,6 +57,46 @@ def refine_sequence(model, pose_path, traj_path):
 
     return raw_pose, final_pose
 
+def apply_foot_locking(data):
+    """
+    발이 바닥에 닿아있을 때(Grounding) 좌표를 고정하여 미끄러짐 방지
+    data shape: (T, 33, 3)
+    """
+    # BlazePose 발 관련 인덱스: 27,28(발목), 29,30(뒤꿈치), 31,32(발가락)
+    foot_indices = [27, 28, 29, 30, 31, 32]
+    
+    T = data.shape[0]
+    
+    # [설정] 민감도 조절 (이 값을 조절해서 미끄러짐을 잡으세요)
+    # VEL_THRESH: 이 속도보다 느리면 '멈춘 것'으로 간주 (너무 크면 발이 쩍쩍 달라붙음)
+    VEL_THRESH = 0.015  
+    # HEIGHT_THRESH: 바닥에서 이 높이 이내에 있어야 고정 (너무 크면 공중에서 멈춤)
+    HEIGHT_THRESH = 0.08 
+
+    # 첫 프레임은 제외하고 1부터 시작
+    for t in range(1, T):
+        for idx in foot_indices:
+            curr_pos = data[t, idx]   # 현재 프레임 위치
+            prev_pos = data[t-1, idx] # 이전 프레임 위치
+            
+            # 1. 이동 거리(속도) 계산 (XZ 평면 기준)
+            dist = np.linalg.norm(curr_pos[[0, 2]] - prev_pos[[0, 2]])
+            
+            # 2. 높이 확인 (Y값은 이미 Grounding 보정된 상태라 가정)
+            height = curr_pos[1]
+
+            # 3. 조건: 속도가 느리고 & 바닥에 가까우면 -> 위치 고정
+            if dist < VEL_THRESH and abs(height) < HEIGHT_THRESH:
+                # X, Z 좌표를 이전 프레임과 똑같이 만듦 (Lock)
+                data[t, idx, 0] = prev_pos[0] 
+                data[t, idx, 2] = prev_pos[2]
+                
+                # (선택) Y축(높이)도 고정하고 싶으면 아래 주석 해제
+                # data[t, idx, 1] = prev_pos[1] 
+
+    print("  -> Foot Locking Applied (Anti-Sliding)")
+    return data
+
 def save_to_csv(data, filename):
     """
     (T, 33, 3) 데이터를 CSV로 저장
@@ -68,16 +108,20 @@ def save_to_csv(data, filename):
     feet_indices = [29, 30, 31, 32] 
     all_feet_y = data[:, feet_indices, 1] 
     ground_level = np.percentile(all_feet_y, 1) # 하위 1%를 바닥으로 간주
+
+    MANUAL_OFFSET = 0
     
     # 바닥으로 내리기
-    data[:, :, 1] -= ground_level
+    data[:, :, 1] -= (ground_level + MANUAL_OFFSET)
+
+    data = apply_foot_locking(data)
 
     # ------------------------------------------------------------------
     # [2] 스케일 및 겹침 방지 설정
     # ------------------------------------------------------------------
-    UNITY_SCALE = 0.55   # 전체 크기
+    UNITY_SCALE = 1.2   # 전체 크기
     WIDTH_FACTOR = 1.2   # 좌우 벌리기 (겹침 방지)
-    DEPTH_FACTOR = 1.3   # 앞뒤 벌리기 (겹침 방지)
+    DEPTH_FACTOR = 1.2   # 앞뒤 벌리기 (겹침 방지)
 
     T, nBones, _ = data.shape
     rows = []
@@ -151,8 +195,6 @@ def main():
         vis = PoseViser(fps=30)
         vis.play_two_sequences(raw_pose, refined_pose, offset=1.0)
         
-        # 하나만 보고 멈추려면 아래 주석 해제
-        # break 
 
 if __name__ == "__main__":
     main()

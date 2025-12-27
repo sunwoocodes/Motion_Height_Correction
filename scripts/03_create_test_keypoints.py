@@ -10,9 +10,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(ROOT)
 
 # ---------------------------------------------------------
-# [설정] 테스트할 비디오 파일 경로를 여기에 넣으세요!
+# 테스트할 비디오 파일 경로를 여기에 넣으세요!
 # ---------------------------------------------------------
-VIDEO_PATH = r"C:\Users\SUNWOO\Desktop\AI\AI_ML_UnityProject2\AI_ML_Python_Final\final_project\data\raw_videos\2025_셔플댄스_초급_24_스텝.mp4"
+VIDEO_PATH = r"C:\Users\SUNWOO\Desktop\AI\AI_ML_UnityProject2\AI_ML_Python_Final\final_project\data\raw_videos\dance_2.mp4"
 # ---------------------------------------------------------
 
 # 저장될 위치: 바로 테스트가 가능하도록 processed/test 폴더로 지정
